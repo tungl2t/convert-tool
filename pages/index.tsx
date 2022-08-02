@@ -3,7 +3,7 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import readXlsxFile from "read-excel-file";
 import { useRef, useState } from "react";
-import { Textarea } from "@chakra-ui/react";
+import { Button, Textarea } from "@chakra-ui/react";
 
 const Home: NextPage = () => {
   const inputFile = useRef(null);
@@ -85,6 +85,9 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
+        <Button colorScheme="teal" variant="outline" marginBottom={5} onClick={() => {inputFile?.current?.click()}}>
+          Import excel file
+        </Button>
         <input
           type="file"
           ref={inputFile}
@@ -92,6 +95,7 @@ const Home: NextPage = () => {
           onClick={(event: any) => {
             event.target.value = null;
           }}
+          style={{display: 'none'}}
         />
         <Textarea value={value} isReadOnly resize="none" height={"60vh"} />
       </main>
