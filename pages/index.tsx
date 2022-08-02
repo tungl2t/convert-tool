@@ -3,12 +3,16 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import readXlsxFile from "read-excel-file";
 import { useRef, useState } from "react";
-import { Button, Textarea } from "@chakra-ui/react";
+import { Button, Flex, Textarea } from "@chakra-ui/react";
 
 const Home: NextPage = () => {
-  const inputFile = useRef<HTMLInputElement>(null);
+  const inputFileEl = useRef<HTMLInputElement>(null);
+  const textAreaEl = useRef<HTMLTextAreaElement>(null);
   const [value, setValue] = useState("");
+  const [label, setLabel] = useState("Copy")
+
   const handleChange = (e: any) => {
+    setLabel('Copy')
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       readXlsxFile(file).then((rows) => {
@@ -75,28 +79,45 @@ const Home: NextPage = () => {
     }
   };
 
+  const onCopyText = () => {
+    const textData = textAreaEl?.current?.value ?? '';
+    if (textData) {
+      textAreaEl?.current?.select();
+      navigator.clipboard.writeText(textData);
+      setLabel('Copied!')
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Head>
         <title>Niteco Convert Tool</title>
-        <meta name="description" content="Niteco Convert Tool" />
-        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content="Niteco Convert Tool"/>
+        <link rel="icon" href="/favicon.ico"/>
       </Head>
 
       <main className={styles.main}>
-        <Button colorScheme="teal" variant="outline" marginBottom={5} onClick={() => {inputFile?.current?.click()}}>
-          Import excel file
-        </Button>
-        <input
-          type="file"
-          ref={inputFile}
-          onChange={handleChange}
-          onClick={(event: any) => {
-            event.target.value = null;
-          }}
-          style={{display: 'none'}}
-        />
-        <Textarea value={value} isReadOnly resize="none" height={"60vh"} />
+        <Flex maxWidth={600} w={'95%'} flexDirection={'column'} justifyContent={'center'} alignContent={'center'}>
+          <Button colorScheme="teal" variant="outline" marginBottom={5} onClick={() => {
+            inputFileEl?.current?.click()
+          }}>
+            Import Excel File
+          </Button>
+          <input
+            type="file"
+            ref={inputFileEl}
+            onChange={handleChange}
+            onClick={(event: any) => {
+              event.target.value = null;
+            }}
+            style={{ display: 'none' }}
+          />
+          <Textarea ref={textAreaEl} value={value} isReadOnly resize="none" height={"60vh"} w={'100%'}
+                    variant="outline" />
+          <Button marginTop={5} colorScheme="teal" variant="outline" onClick={onCopyText}>
+            {label}
+          </Button>
+        </Flex>
       </main>
     </div>
   );
