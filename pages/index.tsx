@@ -4,19 +4,26 @@ import styles from "../styles/Home.module.css";
 import readXlsxFile from "read-excel-file";
 import { useRef, useState } from "react";
 import { Button, Flex, Textarea } from "@chakra-ui/react";
+import { Cell } from "read-excel-file/types";
 
 const Home: NextPage = () => {
   const inputFileEl = useRef<HTMLInputElement>(null);
   const textAreaEl = useRef<HTMLTextAreaElement>(null);
   const [value, setValue] = useState("");
-  const [label, setLabel] = useState("Copy")
+  const [label, setLabel] = useState("Copy");
+
+  const handleStatusData = (
+    status: Cell,
+    statusValue: string | number | boolean | DateConstructor
+  ) => {
+    return statusValue === "x" ? `; ${status}` : `; ${status}: ${statusValue}`;
+  };
 
   const handleChange = (e: any) => {
-    setLabel('Copy')
+    setLabel("Copy");
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       readXlsxFile(file).then((rows) => {
-
         let report = "Project summary report: \n\n";
         if (rows[0][1] && rows[0][3]) {
           report += `${rows[0][1]}: ${rows[0][3]} \n\n`;
@@ -46,25 +53,20 @@ const Home: NextPage = () => {
                       report += `: ${rowData[index + 1]}`;
                     }
 
-                    if (rowData[index + 2]) {
-                      report += `; ${rows[3][index + 2]}: ${
-                        rowData[index + 2]
-                      }`;
-                    }
-                    if (rowData[index + 3]) {
-                      report += `; ${rows[3][index + 3]}: ${
-                        rowData[index + 3]
-                      }`;
-                    }
-                    if (rowData[index + 4]) {
-                      report += `; ${rows[3][index + 4]}: ${
-                        rowData[index + 4]
-                      }`;
-                    }
-                    if (rowData[index + 5]) {
-                      report += `; ${rows[3][index + 5]}: ${
-                        rowData[index + 5]
-                      }`;
+                    /**
+                     * Status Index:
+                     *  2: Done
+                     *  3: In-progress
+                     *  4: Customer Review
+                     *  5: Pending input
+                     */
+                    for (let statusIndex = 2; statusIndex <= 5; statusIndex++) {
+                      if (rowData[index + statusIndex]) {
+                        report += handleStatusData(
+                          rows[3][index + statusIndex],
+                          rowData[index + statusIndex]
+                        );
+                      }
                     }
                     report += "\n";
                   }
@@ -80,27 +82,38 @@ const Home: NextPage = () => {
   };
 
   const onCopyText = () => {
-    const textData = textAreaEl?.current?.value ?? '';
+    const textData = textAreaEl?.current?.value ?? "";
     if (textData) {
       textAreaEl?.current?.select();
       navigator.clipboard.writeText(textData);
-      setLabel('Copied!')
+      setLabel("Copied!");
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
       <Head>
         <title>Niteco Convert Tool</title>
-        <meta name="description" content="Niteco Convert Tool"/>
-        <link rel="icon" href="/favicon.ico"/>
+        <meta name="description" content="Niteco Convert Tool" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
-        <Flex maxWidth={600} w={'95%'} flexDirection={'column'} justifyContent={'center'} alignContent={'center'}>
-          <Button colorScheme="teal" variant="outline" marginBottom={5} onClick={() => {
-            inputFileEl?.current?.click()
-          }}>
+        <Flex
+          maxWidth={600}
+          w={"95%"}
+          flexDirection={"column"}
+          justifyContent={"center"}
+          alignContent={"center"}
+        >
+          <Button
+            colorScheme="teal"
+            variant="outline"
+            marginBottom={5}
+            onClick={() => {
+              inputFileEl?.current?.click();
+            }}
+          >
             Import Excel File
           </Button>
           <input
@@ -110,11 +123,23 @@ const Home: NextPage = () => {
             onClick={(event: any) => {
               event.target.value = null;
             }}
-            style={{ display: 'none' }}
+            style={{ display: "none" }}
           />
-          <Textarea ref={textAreaEl} value={value} isReadOnly resize="none" height={"60vh"} w={'100%'}
-                    variant="outline" />
-          <Button marginTop={5} colorScheme="teal" variant="outline" onClick={onCopyText}>
+          <Textarea
+            ref={textAreaEl}
+            value={value}
+            isReadOnly
+            resize="none"
+            height={"60vh"}
+            w={"100%"}
+            variant="outline"
+          />
+          <Button
+            marginTop={5}
+            colorScheme="teal"
+            variant="outline"
+            onClick={onCopyText}
+          >
             {label}
           </Button>
         </Flex>
