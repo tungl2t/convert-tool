@@ -6,13 +6,12 @@ import { useRef, useState } from "react";
 import { Button, Textarea } from "@chakra-ui/react";
 
 const Home: NextPage = () => {
-  const inputFile = useRef(null);
+  const inputFile = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
   const handleChange = (e: any) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       readXlsxFile(file).then((rows) => {
-        console.log(rows);
 
         let report = "Project summary report: \n\n";
         if (rows[0][1] && rows[0][3]) {
